@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.generation.projeto_final_bloco_02.model.Produto;
+import com.generation.projeto_final_bloco_02.repository.CategoriaRepository;
 import com.generation.projeto_final_bloco_02.repository.ProdutoRepository;
 
 import jakarta.validation.Valid;
@@ -30,6 +31,9 @@ public class ProdutoController {
 
 	@Autowired
 	private ProdutoRepository produtoRepository;
+	
+	@Autowired
+	private CategoriaRepository categoriaRepository;
 	
 	
 	// ====================================================================================================================
@@ -54,8 +58,16 @@ public class ProdutoController {
 	
 	@PostMapping
 	public ResponseEntity<Produto> post(@Valid @RequestBody Produto produto) {
-		produto.setId(null);
-		return ResponseEntity.status(HttpStatus.CREATED).body(produtoRepository.save(produto));
+
+	    if(categoriaRepository.existsById(produto.getCategoria().getId())) {
+
+	        produto.setId(null);
+
+	        return ResponseEntity.status(HttpStatus.CREATED)
+	                .body(produtoRepository.save(produto));
+	    }
+
+	    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria não existe!", null);
 	}
 	
 	// ====================================================================================================================
